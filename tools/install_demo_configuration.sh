@@ -358,6 +358,7 @@ echo "opendistro_security.ssl.transport.pemkey_filepath: esnode-key.pem" | $SUDO
 echo "opendistro_security.ssl.transport.pemtrustedcas_filepath: root-ca.pem" | $SUDO_CMD tee -a "$ES_CONF_FILE" > /dev/null
 echo "opendistro_security.ssl.transport.enforce_hostname_verification: false" | $SUDO_CMD tee -a  "$ES_CONF_FILE" > /dev/null
 echo "opendistro_security.ssl.http.enabled: true" | $SUDO_CMD tee -a "$ES_CONF_FILE" > /dev/null
+echo "opendistro_security.ssl.http.clientauth_mode: OPTIONAL" | $SUDO_CMD tee -a "$ES_CONF_FILE" > /dev/null
 echo "opendistro_security.ssl.http.pemcert_filepath: esnode.pem" | $SUDO_CMD tee -a "$ES_CONF_FILE" > /dev/null
 echo "opendistro_security.ssl.http.pemkey_filepath: esnode-key.pem" | $SUDO_CMD tee -a  "$ES_CONF_FILE" > /dev/null
 echo "opendistro_security.ssl.http.pemtrustedcas_filepath: root-ca.pem" | $SUDO_CMD tee -a "$ES_CONF_FILE" > /dev/null
@@ -365,9 +366,11 @@ echo "opendistro_security.allow_unsafe_democertificates: true" | $SUDO_CMD tee -
 if [ "$initsecurity" == 1 ]; then
     echo "opendistro_security.allow_default_init_securityindex: true" | $SUDO_CMD tee -a "$ES_CONF_FILE" > /dev/null
 fi
-echo "opendistro_security.authcz.admin_dn:" | $SUDO_CMD tee -a "$ES_CONF_FILE" > /dev/null
-echo "  - CN=kirk,OU=client,O=client,L=test, C=de" | $SUDO_CMD tee -a "$ES_CONF_FILE" > /dev/null 
+echo "#opendistro_security.authcz.admin_dn:" | $SUDO_CMD tee -a "$ES_CONF_FILE" > /dev/null
+echo "#  - CN=kirk,OU=client,O=client,L=test, C=de" | $SUDO_CMD tee -a "$ES_CONF_FILE" > /dev/null 
 echo "" | $SUDO_CMD tee -a "$ES_CONF_FILE" > /dev/null 
+echo "opendistro_security.authcz.rest_impersonation_user.kirk:" | $SUDO_CMD tee -a "$ES_CONF_FILE" > /dev/null
+echo "  - ?*" | $SUDO_CMD tee -a "$ES_CONF_FILE" > /dev/null 
 echo "opendistro_security.audit.type: internal_elasticsearch" | $SUDO_CMD tee -a "$ES_CONF_FILE" > /dev/null
 echo "opendistro_security.enable_snapshot_restore_privilege: true" | $SUDO_CMD tee -a "$ES_CONF_FILE" > /dev/null
 echo "opendistro_security.check_snapshot_restore_write_privileges: true" | $SUDO_CMD tee -a "$ES_CONF_FILE" > /dev/null
