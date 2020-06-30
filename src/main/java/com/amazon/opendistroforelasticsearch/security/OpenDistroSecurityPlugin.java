@@ -164,6 +164,8 @@ import com.amazon.opendistroforelasticsearch.security.transport.DefaultInterClus
 import com.amazon.opendistroforelasticsearch.security.transport.InterClusterRequestEvaluator;
 import com.amazon.opendistroforelasticsearch.security.transport.OpenDistroSecurityInterceptor;
 import com.amazon.opendistroforelasticsearch.security.user.User;
+import com.amazon.opendistroforelasticsearch.security.rolesinfo.RolesInfoAction;
+import com.amazon.opendistroforelasticsearch.security.transport.TransportRolesInfoAction;
 import com.google.common.collect.Lists;
 
 public final class OpenDistroSecurityPlugin extends OpenDistroSecuritySSLPlugin implements ClusterPlugin, MapperPlugin {
@@ -481,6 +483,8 @@ public final class OpenDistroSecurityPlugin extends OpenDistroSecuritySSLPlugin 
         if(!disabled && !sslOnly) {
             actions.add(new ActionHandler<>(ConfigUpdateAction.INSTANCE, TransportConfigUpdateAction.class));
             actions.add(new ActionHandler<>(WhoAmIAction.INSTANCE, TransportWhoAmIAction.class));
+            TransportRolesInfoAction.setEvaluator(evaluator, threadPool); //fixme
+            actions.add(new ActionHandler<>(RolesInfoAction.INSTANCE, TransportRolesInfoAction.class));
         }
         return actions;
     }
@@ -792,7 +796,7 @@ public final class OpenDistroSecurityPlugin extends OpenDistroSecuritySSLPlugin 
         
         cr.setDynamicConfigFactory(dcf);
         
-        odsf = new OpenDistroSecurityFilter(evaluator, adminDns, dlsFlsValve, auditLog, threadPool, cs, compatConfig, irr);
+        odsf = new OpenDistroSecurityFilter(settings, evaluator, adminDns, dlsFlsValve, auditLog, threadPool, cs, compatConfig, irr);
 
 
         final String principalExtractorClass = settings.get(SSLConfigConstants.OPENDISTRO_SECURITY_SSL_TRANSPORT_PRINCIPAL_EXTRACTOR_CLASS, null);
@@ -990,6 +994,7 @@ public final class OpenDistroSecurityPlugin extends OpenDistroSecuritySSLPlugin 
             settings.add(Setting.boolSetting(ConfigConstants.OPENDISTRO_SECURITY_UNSUPPORTED_RESTAPI_ALLOW_SECURITYCONFIG_MODIFICATION, false, Property.NodeScope, Property.Filtered));
             settings.add(Setting.boolSetting(ConfigConstants.OPENDISTRO_SECURITY_UNSUPPORTED_LOAD_STATIC_RESOURCES, true, Property.NodeScope, Property.Filtered));
             settings.add(Setting.boolSetting(ConfigConstants.OPENDISTRO_SECURITY_SSL_CERT_RELOAD_ENABLED, false, Property.NodeScope, Property.Filtered));
+            settings.add(Setting.boolSetting(ConfigConstants.OPENDISTRO_SECURITY_INJECT_ROLE_ENABLED, false, Property.NodeScope, Property.Filtered));
         }
         
         return settings;

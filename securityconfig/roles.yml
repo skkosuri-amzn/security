@@ -11,7 +11,7 @@ security_rest_api_access:
   reserved: true
  
 
-# Allows users to use all alerting functionality
+# Allows users to use all alerting functionality : TODO: tighten this further.
 alerting_role:
   reserved: false
   cluster_permissions:
@@ -33,5 +33,6 @@ alerting_role:
         - indices_monitor
         - indices:admin/aliases/get
         - indices:admin/mappings/get
+        - indices:monitor
 
 
