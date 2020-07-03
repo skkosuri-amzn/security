@@ -27,14 +27,14 @@ final public class RoleInjector {
     public RoleInjector(final Settings settings, final ThreadContext ctx, final AuditLog auditLog) {
         this.threadContext = ctx;
         this.auditLog = auditLog;
-        this.injectRoleEnabled = settings.getAsBoolean(ConfigConstants.OPENDISTRO_SECURITY_INJECT_ROLE_ENABLED, false);
+        this.injectRoleEnabled = settings.getAsBoolean(ConfigConstants.OPENDISTRO_SECURITY_INJECT_ROLE_ENABLED,
+                false);
         this.injectRoleStr = ctx.getTransient(ConfigConstants.OPENDISTRO_SECURITY_INJECT_ROLE);
 
         if(log.isDebugEnabled()){
             log.debug("Injected role enabled: "+injectRoleEnabled());
             log.debug("Injected role: "+injectRoleStr);
         }
-
     }
 
     public boolean injectRoleEnabled() {
@@ -45,13 +45,12 @@ final public class RoleInjector {
         if (!injectRoleEnabled())
             return null;
 
-        String[] parts = injectRoleStr.split("\\|");
         //todo: any additional checks for user?
         // backend roles
         Set<String> newMappedRoles = new HashSet<>();
-        if (parts.length > 1 && !Strings.isNullOrEmpty(parts[1])) {
-            if (parts[1].length() > 0) {
-                newMappedRoles.addAll(Arrays.asList(parts[1].split(",")));
+        if (!Strings.isNullOrEmpty(injectRoleStr)) {
+            if (injectRoleStr.length() > 0) {
+                newMappedRoles.addAll(Arrays.asList(injectRoleStr.split(",")));
             }
         }
         return newMappedRoles;
