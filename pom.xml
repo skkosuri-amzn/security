@@ -484,12 +484,6 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>com.amazon.opendistroforelasticsearch.commons</groupId>
-            <artifactId>opendistro-commons</artifactId>
-            <version>1.8.0.0</version>
-        </dependency>
-
     </dependencies>
 
     <build>

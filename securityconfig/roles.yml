@@ -12,7 +12,7 @@ security_rest_api_access:
  
 
 # Allows users to use all alerting functionality : TODO: tighten this further.
-alerting_role:
+alerting_full_access:
   reserved: false
   cluster_permissions:
     - cluster_monitor
@@ -20,19 +20,42 @@ alerting_role:
     - index_patterns:
       - '.opendistro-alerting-config'
       allowed_actions:
-        - indices_all
-      dls: '{"bool":{"should":[{"match":{"monitor.createdBy":"${user.name}"}},{"match":{"destination.createdBy":"${user.name}"}}]}}'
+        - crud
+      masked_fields:
+        - monitor.created_by
+        - monitor.associated_roles
+        - destination.created_by
+        - destination.associated_roles
     - index_patterns:
-      - '.opendistro-alerting-alert*'
+        - '.opendistro-alerting-alert*'
       allowed_actions:
-        - indices_all
-      dls: '{"match": {"monitor_created_by": "${user.name}"}}'
+        - crud
+      masked_fields:
+        - monitor_created_by
+        - monitor_associated_roles
     - index_patterns:
       - "*"
       allowed_actions:
-        - indices_monitor
         - indices:admin/aliases/get
         - indices:admin/mappings/get
         - indices:monitor
 
-
+alerting_read_access:
+  reserved: false
+  index_permissions:
+    - index_patterns:
+        - '.opendistro-alerting-config'
+      allowed_actions:
+        - read
+      masked_fields:
+        - monitor.created_by
+        - monitor.associated_roles
+        - destination.created_by
+        - destination.associated_roles
+    - index_patterns:
+        - '.opendistro-alerting-alert*'
+      allowed_actions:
+        - read
+      masked_fields:
+        - monitor_created_by
+        - monitor_associated_roles
