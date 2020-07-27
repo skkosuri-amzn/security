@@ -67,7 +67,7 @@ public class RolesInjectorIntegTest extends SingleClusterTest {
                 .put("path.home", "./target")
                 .put("node.name", "testclient")
                 .put("discovery.initial_state_timeout","8s")
-                .put("opendistro_security_injected_roles_enabled", "true")
+                .put("opendistro_security_inject_roles_enabled", "true")
                 .putList("discovery.zen.ping.unicast.hosts", clusterInfo.nodeHost+":"+clusterInfo.nodePort)
                 .build();
 

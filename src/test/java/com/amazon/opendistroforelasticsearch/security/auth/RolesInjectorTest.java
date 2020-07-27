@@ -19,7 +19,7 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.util.concurrent.ThreadContext;
 
 import static com.amazon.opendistroforelasticsearch.security.support.ConfigConstants.OPENDISTRO_SECURITY_INJECTED_ROLES;
-import static com.amazon.opendistroforelasticsearch.security.support.ConfigConstants.OPENDISTRO_SECURITY_INJECTED_ROLES_ENABLED;
+import static com.amazon.opendistroforelasticsearch.security.support.ConfigConstants.OPENDISTRO_SECURITY_INJECT_ROLES_ENABLED;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
@@ -41,7 +41,7 @@ public class RolesInjectorTest {
     public void testEnabledAndInjected() {
         ThreadContext threadContext = new ThreadContext(Settings.EMPTY);
         threadContext.putTransient(OPENDISTRO_SECURITY_INJECTED_ROLES, "user1|role_1,role_2");
-        Settings settings = Settings.builder().put(OPENDISTRO_SECURITY_INJECTED_ROLES_ENABLED,"true").build();
+        Settings settings = Settings.builder().put(OPENDISTRO_SECURITY_INJECT_ROLES_ENABLED,"true").build();
 
         RolesInjector rolesInjector = new RolesInjector(settings, threadContext);
         assertEquals(true, rolesInjector.isRoleInjected());

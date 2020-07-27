@@ -47,7 +47,7 @@ final public class RolesInjector {
 
     public RolesInjector(final Settings settings, final ThreadContext ctx) {
         this.threadContext = ctx;
-        this.enabled = settings.getAsBoolean(ConfigConstants.OPENDISTRO_SECURITY_INJECTED_ROLES_ENABLED, true);
+        this.enabled = settings.getAsBoolean(ConfigConstants.OPENDISTRO_SECURITY_INJECT_ROLES_ENABLED, true);
 
         parseInjectedStr(ctx.getTransient(ConfigConstants.OPENDISTRO_SECURITY_INJECTED_ROLES));
         if(log.isDebugEnabled()){

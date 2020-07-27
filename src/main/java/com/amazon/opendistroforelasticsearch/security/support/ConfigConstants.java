@@ -94,9 +94,6 @@ public class ConfigConstants {
 
     public static final String OPENDISTRO_SECURITY_INJECTED_USER = "injected_user";
 
-    public static final String OPENDISTRO_SECURITY_INJECTED_ROLES_ENABLED = "opendistro_security_injected_roles_enabled";
-    public static final String OPENDISTRO_SECURITY_INJECTED_ROLES = "opendistro_security_injected_roles";
-
     public static final String OPENDISTRO_SECURITY_XFF_DONE = OPENDISTRO_SECURITY_CONFIG_PREFIX+"xff_done";
 
     public static final String SSO_LOGOUT_URL = OPENDISTRO_SECURITY_CONFIG_PREFIX+"sso_logout_url";
@@ -250,4 +247,8 @@ public class ConfigConstants {
     public static final List<String> OPENDISTRO_SECURITY_PROTECTED_INDICES_DEFAULT = Collections.emptyList();
     public static final String OPENDISTRO_SECURITY_PROTECTED_INDICES_ROLES_KEY = "opendistro_security.protected_indices.roles";
     public static final List<String> OPENDISTRO_SECURITY_PROTECTED_INDICES_ROLES_DEFAULT = Collections.emptyList();
+
+    // Roles injection for plugins
+    public static final String OPENDISTRO_SECURITY_INJECT_ROLES_ENABLED = "opendistro_security.inject_roles.enabled";
+    public static final String OPENDISTRO_SECURITY_INJECTED_ROLES = "opendistro_security_injected_roles";
 }
