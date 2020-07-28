@@ -24,32 +24,60 @@ import static com.amazon.opendistroforelasticsearch.security.support.ConfigConst
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 
 public class RolesInjectorTest {
 
     @Test
-    public void testDisabled() {
+    public void testNotInjected() {
         ThreadContext threadContext = new ThreadContext(Settings.EMPTY);
-        RolesInjector rolesInjector = new RolesInjector(threadContext);
-
-        assertEquals(false, rolesInjector.isRoleInjected());
+        RolesInjector rolesInjector = new RolesInjector();
+        Set<String> roles = rolesInjector.injectUserAndRoles(threadContext);
+        assertEquals(null, roles);
         User user = threadContext.getTransient(ConfigConstants.OPENDISTRO_SECURITY_USER);
         assertEquals(null, user);
-        assertEquals(null, rolesInjector.getInjectedRoles());
     }
 
     @Test
-    public void testEnabledAndInjected() {
+    public void testInjected() {
         ThreadContext threadContext = new ThreadContext(Settings.EMPTY);
         threadContext.putTransient(OPENDISTRO_SECURITY_INJECTED_ROLES, "user1|role_1,role_2");
 
-        RolesInjector rolesInjector = new RolesInjector(threadContext);
-        assertEquals(true, rolesInjector.isRoleInjected());
+        RolesInjector rolesInjector = new RolesInjector();
+        Set<String> roles = rolesInjector.injectUserAndRoles(threadContext);
+
         User user = threadContext.getTransient(ConfigConstants.OPENDISTRO_SECURITY_USER);
         assertEquals("user1", user.getName());
         assertEquals(0, user.getRoles().size());
-        assertEquals(2, rolesInjector.getInjectedRoles().size());
-        assertEquals(true, rolesInjector.getInjectedRoles().contains("role_1"));
-        assertEquals(true, rolesInjector.getInjectedRoles().contains("role_2"));
+        assertEquals(2, roles.size());
+        assertEquals(true, roles.contains("role_1"));
+        assertEquals(true, roles.contains("role_2"));
+    }
+
+    @Test
+    public void testCorruptedInjection() {
+        List<String> corruptedStrs = Arrays.asList(
+                "invalid",
+                "role_1,role_2",
+                " | ",
+                "  "
+        );
+
+        corruptedStrs.forEach(name -> {
+            ThreadContext threadContext = new ThreadContext(Settings.EMPTY);
+            threadContext.putTransient(OPENDISTRO_SECURITY_INJECTED_ROLES, name);
+
+            RolesInjector rolesInjector = new RolesInjector();
+            Set<String> roles = rolesInjector.injectUserAndRoles(threadContext);
+
+            assertEquals(null, roles);
+            User user = threadContext.getTransient(ConfigConstants.OPENDISTRO_SECURITY_USER);
+            assertEquals(null, user);
+        });
     }
 }

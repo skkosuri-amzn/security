@@ -39,18 +39,28 @@ import java.util.Set;
 
 final public class RolesInjector {
     protected final Logger log = LogManager.getLogger(RolesInjector.class);
-    private User user = null;
-    private Set<String> roles = null;
 
-    public RolesInjector(final ThreadContext ctx) {
+    public RolesInjector() {
+        //empty
+    }
+
+    public Set<String> injectUserAndRoles(final ThreadContext ctx) {
+
         if(log.isDebugEnabled()){
             log.debug("Injected role str: "+ ctx.getTransient(ConfigConstants.OPENDISTRO_SECURITY_INJECTED_ROLES));
         }
-        parseInjectedStr(ctx.getTransient(ConfigConstants.OPENDISTRO_SECURITY_INJECTED_ROLES));
-        if(isRoleInjected()) {
-            addRemoteAddr(ctx);
-            addUser(ctx);
+        String injectedStr = ctx.getTransient(ConfigConstants.OPENDISTRO_SECURITY_INJECTED_ROLES);
+        if (Strings.isNullOrEmpty(injectedStr)) {
+            return null;
         }
+
+        User user = parseUser(injectedStr);
+        Set<String> roles = parseRoles(injectedStr);
+        if(user != null && roles != null) {
+            addRemoteAddr(ctx);
+            addUser(user, ctx);
+        }
+        return roles;
     }
 
     private void addRemoteAddr(final ThreadContext threadContext) {
@@ -61,7 +71,7 @@ final public class RolesInjector {
                 new TransportAddress(InetAddress.getLoopbackAddress(), 9300));
     }
 
-    private void addUser(final ThreadContext threadContext) {
+    private void addUser(final User user, final ThreadContext threadContext) {
         if(threadContext.getTransient(ConfigConstants.OPENDISTRO_SECURITY_USER) != null)
             return;
 
@@ -71,34 +81,34 @@ final public class RolesInjector {
     /*
      * Input string format: user|role_1,role2
      */
-    private void parseInjectedStr(final String injectedStr) {
-        if (Strings.isNullOrEmpty(injectedStr))
-            return;
-
+    private User parseUser(final String injectedStr) {
         String[] strs = injectedStr.split("\\|");
         if (strs.length == 0) {
             log.error("Roles injected string malformed, could not extract parts. User string was '{}.'" +
                     " Roles injection failed.", injectedStr);
-            return;
+            return null;
         }
-        if (Strings.isNullOrEmpty(strs[0])) {
+        if (Strings.isNullOrEmpty(strs[0].trim())) {
             log.error("Username must not be null, injected string was '{}.' Roles injection failed.", injectedStr);
-            return;
+            return null;
         }
-        this.user = new User(strs[0]);
-        this.roles = new HashSet<>();
-        if (Strings.isNullOrEmpty(strs[1])) {
+        return new User(strs[0]);
+    }
+
+    /*
+     * Input string format: user|role_1,role2
+     */
+    private Set<String> parseRoles(final String injectedStr) {
+        String[] strs = injectedStr.split("\\|");
+        if (strs.length == 1) {
+            log.error("Roles injected string malformed, could not extract parts. User string was '{}.'" +
+                    " Roles injection failed.", injectedStr);
+            return null;
+        }
+        if (Strings.isNullOrEmpty(strs[1].trim())) {
             log.error("Roles must not be null, injected string was '{}.' Roles injection failed.", injectedStr);
-            return;
+            return null;
         }
-        roles.addAll(Arrays.asList(strs[1].split(",")));
-    }
-
-    public boolean isRoleInjected() {
-        return (user != null) && (!roles.isEmpty());
-    }
-
-    public final Set<String> getInjectedRoles() {
-        return roles;
+        return new HashSet<>(Arrays.asList(strs[1].split(",")));
     }
 }
