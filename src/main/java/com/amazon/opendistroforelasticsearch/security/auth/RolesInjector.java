@@ -20,7 +20,6 @@ import com.amazon.opendistroforelasticsearch.security.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.common.Strings;
-import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.common.util.concurrent.ThreadContext;
 
@@ -40,28 +39,33 @@ import java.util.Set;
 
 final public class RolesInjector {
     protected final Logger log = LogManager.getLogger(RolesInjector.class);
-    private final boolean enabled;
     private User user = null;
     private Set<String> roles = null;
-    private final ThreadContext threadContext;
 
-    public RolesInjector(final Settings settings, final ThreadContext ctx) {
-        this.threadContext = ctx;
-        this.enabled = settings.getAsBoolean(ConfigConstants.OPENDISTRO_SECURITY_INJECT_ROLES_ENABLED, true);
-
-        parseInjectedStr(ctx.getTransient(ConfigConstants.OPENDISTRO_SECURITY_INJECTED_ROLES));
+    public RolesInjector(final ThreadContext ctx) {
         if(log.isDebugEnabled()){
             log.debug("Injected role str: "+ ctx.getTransient(ConfigConstants.OPENDISTRO_SECURITY_INJECTED_ROLES));
         }
-        addRemoteAddr(threadContext);
+        parseInjectedStr(ctx.getTransient(ConfigConstants.OPENDISTRO_SECURITY_INJECTED_ROLES));
+        if(isRoleInjected()) {
+            addRemoteAddr(ctx);
+            addUser(ctx);
+        }
     }
 
-    private void addRemoteAddr(ThreadContext threadContext) {
+    private void addRemoteAddr(final ThreadContext threadContext) {
         if(threadContext.getTransient(ConfigConstants.OPENDISTRO_SECURITY_REMOTE_ADDRESS) != null)
             return;
 
         threadContext.putTransient(ConfigConstants.OPENDISTRO_SECURITY_REMOTE_ADDRESS,
                 new TransportAddress(InetAddress.getLoopbackAddress(), 9300));
+    }
+
+    private void addUser(final ThreadContext threadContext) {
+        if(threadContext.getTransient(ConfigConstants.OPENDISTRO_SECURITY_USER) != null)
+            return;
+
+        threadContext.putTransient(ConfigConstants.OPENDISTRO_SECURITY_USER, user);
     }
 
     /*
@@ -91,14 +95,10 @@ final public class RolesInjector {
     }
 
     public boolean isRoleInjected() {
-        return enabled && (user != null) && (roles.size() > 0);
+        return (user != null) && (!roles.isEmpty());
     }
 
     public final Set<String> getInjectedRoles() {
         return roles;
-    }
-
-    public final User getUser() {
-        return user;
     }
 }

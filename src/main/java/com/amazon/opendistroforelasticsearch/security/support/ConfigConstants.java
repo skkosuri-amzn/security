@@ -249,6 +249,5 @@ public class ConfigConstants {
     public static final List<String> OPENDISTRO_SECURITY_PROTECTED_INDICES_ROLES_DEFAULT = Collections.emptyList();
 
     // Roles injection for plugins
-    public static final String OPENDISTRO_SECURITY_INJECT_ROLES_ENABLED = "opendistro_security.inject_roles.enabled";
     public static final String OPENDISTRO_SECURITY_INJECTED_ROLES = "opendistro_security_injected_roles";
 }

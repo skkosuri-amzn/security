@@ -15,11 +15,12 @@
 
 package com.amazon.opendistroforelasticsearch.security.auth;
 
+import com.amazon.opendistroforelasticsearch.security.support.ConfigConstants;
+import com.amazon.opendistroforelasticsearch.security.user.User;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.util.concurrent.ThreadContext;
 
 import static com.amazon.opendistroforelasticsearch.security.support.ConfigConstants.OPENDISTRO_SECURITY_INJECTED_ROLES;
-import static com.amazon.opendistroforelasticsearch.security.support.ConfigConstants.OPENDISTRO_SECURITY_INJECT_ROLES_ENABLED;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
@@ -29,11 +30,11 @@ public class RolesInjectorTest {
     @Test
     public void testDisabled() {
         ThreadContext threadContext = new ThreadContext(Settings.EMPTY);
-        Settings settings = Settings.EMPTY;
-        RolesInjector rolesInjector = new RolesInjector(settings, threadContext);
+        RolesInjector rolesInjector = new RolesInjector(threadContext);
 
         assertEquals(false, rolesInjector.isRoleInjected());
-        assertEquals(null, rolesInjector.getUser());
+        User user = threadContext.getTransient(ConfigConstants.OPENDISTRO_SECURITY_USER);
+        assertEquals(null, user);
         assertEquals(null, rolesInjector.getInjectedRoles());
     }
 
@@ -41,12 +42,12 @@ public class RolesInjectorTest {
     public void testEnabledAndInjected() {
         ThreadContext threadContext = new ThreadContext(Settings.EMPTY);
         threadContext.putTransient(OPENDISTRO_SECURITY_INJECTED_ROLES, "user1|role_1,role_2");
-        Settings settings = Settings.builder().put(OPENDISTRO_SECURITY_INJECT_ROLES_ENABLED,"true").build();
 
-        RolesInjector rolesInjector = new RolesInjector(settings, threadContext);
+        RolesInjector rolesInjector = new RolesInjector(threadContext);
         assertEquals(true, rolesInjector.isRoleInjected());
-        assertEquals("user1", rolesInjector.getUser().getName());
-        assertEquals(0, rolesInjector.getUser().getRoles().size());
+        User user = threadContext.getTransient(ConfigConstants.OPENDISTRO_SECURITY_USER);
+        assertEquals("user1", user.getName());
+        assertEquals(0, user.getRoles().size());
         assertEquals(2, rolesInjector.getInjectedRoles().size());
         assertEquals(true, rolesInjector.getInjectedRoles().contains("role_1"));
         assertEquals(true, rolesInjector.getInjectedRoles().contains("role_2"));
