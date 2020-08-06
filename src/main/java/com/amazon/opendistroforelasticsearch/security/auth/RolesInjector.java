@@ -45,13 +45,13 @@ final public class RolesInjector {
     }
 
     public Set<String> injectUserAndRoles(final ThreadContext ctx) {
-
-        if(log.isDebugEnabled()){
-            log.debug("Injected role str: "+ ctx.getTransient(ConfigConstants.OPENDISTRO_SECURITY_INJECTED_ROLES));
-        }
         String injectedStr = ctx.getTransient(ConfigConstants.OPENDISTRO_SECURITY_INJECTED_ROLES);
         if (Strings.isNullOrEmpty(injectedStr)) {
             return null;
+        }
+
+        if(log.isDebugEnabled()){
+            log.debug("Injected role str: "+ ctx.getTransient(ConfigConstants.OPENDISTRO_SECURITY_INJECTED_ROLES));
         }
 
         User user = parseUser(injectedStr);

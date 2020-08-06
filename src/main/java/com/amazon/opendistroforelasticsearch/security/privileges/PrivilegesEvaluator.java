@@ -164,7 +164,7 @@ public class PrivilegesEvaluator {
     }
 
     public PrivilegesEvaluatorResponse evaluate(final User user, String action0, final ActionRequest request,
-                                                Task task, final Set<String> injecjedRoles) {
+                                                Task task, final Set<String> injectedRoles) {
 
         if (!isInitialized()) {
             throw new ElasticsearchSecurityException("Open Distro Security is not initialized.");
@@ -175,7 +175,7 @@ public class PrivilegesEvaluator {
         }
 
         final TransportAddress caller = Objects.requireNonNull((TransportAddress) this.threadContext.getTransient(ConfigConstants.OPENDISTRO_SECURITY_REMOTE_ADDRESS));
-        final Set<String> mappedRoles = (injecjedRoles == null) ? mapRoles(user, caller) : injecjedRoles;
+        final Set<String> mappedRoles = (injectedRoles == null) ? mapRoles(user, caller) : injectedRoles;
         final SecurityRoles securityRoles = getSecurityRoles(mappedRoles);
 
         final PrivilegesEvaluatorResponse presponse = new PrivilegesEvaluatorResponse();
@@ -186,6 +186,13 @@ public class PrivilegesEvaluator {
             log.debug("action: "+action0+" ("+request.getClass().getSimpleName()+")");
             log.debug("mapped roles: {}",mappedRoles.toString());
         }
+
+        boolean childRequest = (threadContext.getTransient("child_call") == null) ? false : true;
+        if(childRequest) {
+            presponse.allowed = true;
+            return presponse;
+        }
+
 
         final Resolved requestedResolved = irr.resolveRequest(request);
 
@@ -431,6 +438,8 @@ public class PrivilegesEvaluator {
     }
 
     public Set<String> mapRoles(final User user, final TransportAddress caller) {
+        boolean childRequest = (threadContext.getTransient("child_call") == null) ? false : true;
+        log.warn("RANI: "+childRequest);
         return this.configModel.mapSecurityRoles(user, caller);
     }
 
